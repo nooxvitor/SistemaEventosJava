@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos - Sistema de Eventos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">Sistema de Eventos</h1>
+            <div class="text-gray-600">
+                Olá, <%= usuario.nome %> (<%= usuario.cidade %>)
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Criar Novo Evento</h2>
+            <form action="/eventos" method="POST">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="nome">Nome</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" 
+                               type="text" name="nome" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="endereco">Endereço</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                               type="text" name="endereco" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="categoria">Categoria</label>
+                        <select class="shadow border rounded w-full py-2 px-3 text-gray-700"
+                                name="categoria" required>
+                            <option value="FESTA">Festa</option>
+                            <option value="SHOW">Show</option>
+                            <option value="ESPORTE">Esporte</option>
+                            <option value="CONFERÊNCIA">Conferência</option>
+                            <option value="WORKSHOP">Workshop</option>
+                            <option value="OUTRO">Outro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="data">Data</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                               type="date" name="data" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="hora">Hora</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                               type="time" name="hora" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="descricao">Descrição</label>
+                        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                                  name="descricao" required></textarea>
+                    </div>
+                </div>
+                <button class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        type="submit">
+                    Criar Evento
+                </button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% eventos.forEach(function(evento) { %>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-2"><%= evento.nome %></h3>
+                    <p class="text-gray-600 mb-2"><%= evento.categoria %></p>
+                    <p class="text-gray-600 mb-2"><%= evento.endereco %></p>
+                    <p class="text-gray-600 mb-2"><%= new Date(evento.horario).toLocaleString() %></p>
+                    <p class="text-gray-600 mb-4"><%= evento.descricao %></p>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Participantes: <%= evento.participantes.length %>
+                    </p>
+                    <% if (evento.participantes.includes(usuario.email)) { %>
+                        <form action="/cancelar/<%= evento.id %>" method="POST">
+                            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
+                                    type="submit">
+                                Cancelar Participação
+                            </button>
+                        </form>
+                    <% } else { %>
+                        <form action="/participar/<%= evento.id %>" method="POST">
+                            <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+                                    type="submit">
+                                Participar
+                            </button>
+                        </form>
+                    <% } %>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</body>
+</html>
