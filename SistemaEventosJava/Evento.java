@@ -6,6 +6,7 @@ public class Evento {
     private String nome, endereco, categoria, descricao;
     private LocalDateTime horario;
     private ArrayList<String> participantes;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public Evento(String nome, String endereco, String categoria, LocalDateTime horario, String descricao) {
         this.nome = nome;
@@ -41,19 +42,42 @@ public class Evento {
 
     @Override
     public String toString() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        return nome + " | " + categoria + " | " + endereco + " | " + horario.format(fmt) + "\n" + descricao;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Nome: ").append(nome)
+          .append("\nCategoria: ").append(categoria)
+          .append("\nEndereço: ").append(endereco)
+          .append("\nData/Hora: ").append(horario.format(FORMATTER))
+          .append("\nDescrição: ").append(descricao)
+          .append("\nStatus: ").append(getStatus());
+        return sb.toString();
+    }
+
+    private String getStatus() {
+        if (jaAconteceu()) return "Finalizado";
+        if (estaOcorrendo()) return "Em andamento";
+        return "Agendado";
     }
 
     public String toData() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        return nome + ";" + endereco + ";" + categoria + ";" + horario.format(fmt) + ";" + descricao + ";" + String.join(",", participantes);
+        return String.join(";",
+            nome,
+            endereco,
+            categoria,
+            horario.format(FORMATTER),
+            descricao,
+            String.join(",", participantes)
+        );
     }
 
     public static Evento fromData(String linha) {
         String[] partes = linha.split(";");
-        LocalDateTime horario = LocalDateTime.parse(partes[3], DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        if (partes.length < 5) {
+            throw new IllegalArgumentException("Formato de dados inválido");
+        }
+
+        LocalDateTime horario = LocalDateTime.parse(partes[3], FORMATTER);
         Evento e = new Evento(partes[0], partes[1], partes[2], horario, partes[4]);
+        
         if (partes.length > 5 && !partes[5].isEmpty()) {
             for (String p : partes[5].split(",")) {
                 e.adicionarParticipante(p);
