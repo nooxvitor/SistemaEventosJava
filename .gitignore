@@ -1,2 +1,11 @@
-node_modules/
-.env
+*.class
+*.log
+.idea/
+out/
+target/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+events.data
