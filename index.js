@@ -32,11 +32,30 @@ app.get('/', (req, res) => {
   res.render('login');
 });
 
+app.get('/cadastro', (req, res) => {
+  res.render('cadastro');
+});
+
+app.post('/cadastro', async (req, res) => {
+  const { email, nome, senha, cidade } = req.body;
+  try {
+    const usuario = await db.criarUsuario(email, nome, senha, cidade);
+    req.session.usuario = usuario;
+    res.redirect('/eventos');
+  } catch (error) {
+    res.render('cadastro', { erro: 'Email já cadastrado' });
+  }
+});
+
 app.post('/login', async (req, res) => {
-  const { email, nome, cidade } = req.body;
-  const usuario = await db.criarOuAtualizarUsuario(email, nome, cidade);
-  req.session.usuario = usuario;
-  res.redirect('/eventos');
+  const { email, senha } = req.body;
+  const usuario = await db.autenticarUsuario(email, senha);
+  if (usuario) {
+    req.session.usuario = usuario;
+    res.redirect('/eventos');
+  } else {
+    res.render('login', { erro: 'Email ou senha inválidos' });
+  }
 });
 
 app.get('/eventos', async (req, res) => {

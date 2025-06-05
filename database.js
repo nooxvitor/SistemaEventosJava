@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import crypto from 'crypto';
 
 export class Database {
   constructor() {
@@ -16,6 +17,7 @@ export class Database {
       CREATE TABLE IF NOT EXISTS usuarios (
         email TEXT PRIMARY KEY,
         nome TEXT NOT NULL,
+        senha TEXT NOT NULL,
         cidade TEXT NOT NULL
       );
 
@@ -38,12 +40,26 @@ export class Database {
     `);
   }
 
-  async criarOuAtualizarUsuario(email, nome, cidade) {
+  hashSenha(senha) {
+    return crypto.createHash('sha256').update(senha).digest('hex');
+  }
+
+  async criarUsuario(email, nome, senha, cidade) {
+    const senhaHash = this.hashSenha(senha);
     await this.db.run(
-      'INSERT OR REPLACE INTO usuarios (email, nome, cidade) VALUES (?, ?, ?)',
-      [email, nome, cidade]
+      'INSERT INTO usuarios (email, nome, senha, cidade) VALUES (?, ?, ?, ?)',
+      [email, nome, senhaHash, cidade]
     );
     return { email, nome, cidade };
+  }
+
+  async autenticarUsuario(email, senha) {
+    const senhaHash = this.hashSenha(senha);
+    const usuario = await this.db.get(
+      'SELECT email, nome, cidade FROM usuarios WHERE email = ? AND senha = ?',
+      [email, senhaHash]
+    );
+    return usuario;
   }
 
   async criarEvento(nome, endereco, categoria, horario, descricao) {
